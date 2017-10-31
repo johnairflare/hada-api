@@ -8,7 +8,7 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
-
-app.listen(8080, () => {
-  console.log('Example app listening on port 3000!');
+var port = 8080;
+app.listen(port, () => {
+  console.log('hada api running '+port+'!');
 });

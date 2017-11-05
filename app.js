@@ -13,8 +13,8 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-app.listen(app.get('port'), app.get('ip'), function () {
+app.listen(app.get('port'), function () {
 
-    console.log( "Hada api on " + app.get('ip') + "server_port " + app.get('port')  );
+    console.log( "Hada api on server_port " + app.get('port')  );
 
 });

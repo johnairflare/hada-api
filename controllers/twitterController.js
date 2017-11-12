@@ -8,7 +8,6 @@ let TwitterController = function(req, res){
 			access_token_key: Config.twitter.access_token_key,
 			access_token_secret: Config.twitter.access_token_secret
 		});
-	// let AvailableLocation = require(process.cwd()+'/available.json');
 
 	let getAvailableWoeid = function(lat, long, callback){
 		let params = {
@@ -38,22 +37,6 @@ let TwitterController = function(req, res){
 			id:location.woeid
 		};
 		
-
-		// lat:35.79449997305192,
-		// 	long:139.79078800000002
-		// name: 'Winnipeg',
-  //   placeType: { code: 7, name: 'Town' },
-  //   url: 'http://where.yahooapis.com/v1/place/2972',
-  //   parentid: 23424775,
-  //   country: 'Canada',
-  //   woeid: 2972,
-  //   countryCode: 'CA'
-		//https://api.twitter.com/1.1/trends/closest.json?lat=35.79449997305192&long=139.79078800000002
-		// let requestUrl = '/trends/available.json';
-		// let requestUrl = '/trends/closest.json';
-		// let params = {
-		// 	q: 'bboy' 
-		// };
 		let requestUrl = '/trends/place.json';
 
 		twitterClient.get(requestUrl, params, function(error, tweets, response) {
@@ -70,12 +53,38 @@ let TwitterController = function(req, res){
 		});
 	}
 
-	let handleKeywords = function(rawKeywords){
+	let handleKeywords = function(keywords){
 		let ret = [];
-		for (var i = 0; i < rawKeywords.length; i++) {
-			ret.push(rawKeywords[i].name);
+		let retSequence = [];
+		let pivot = 0;
+		let noRanking = [];
+		for (var i = 0; i < keywords.length; i++) {
+			var word = keywords[i].name.replace('#','');
+			if (keywords[i].tweet_volume === null) {
+				noRanking.push({word:word, point:0});	
+			}else{
+				var isAdded = false;
+
+				for (let j = pivot; j < retSequence.length; j++) {
+					
+					if (keywords[i].tweet_volume <= retSequence[j].tweet_volume) {
+						console.log('add');
+						// pivot = j;
+						isAdded = true;
+						ret.splice(ret.length - j, 0, {word:word, point:keywords[i].tweet_volume});
+						retSequence.splice(j, 0, keywords[i]);
+						break;
+					}
+				}
+
+				if (isAdded === false) {
+					retSequence.push(keywords[i]);
+					ret.splice(retSequence.length - 1, 0, {word:word, point:keywords[i].tweet_volume});
+				}
+			}
 		}
-		return ret;
+		
+		return ret.concat(noRanking);
 	}
 
 	let initData = function(){

@@ -1,19 +1,21 @@
 let TwitterController = function(req, res){
 
 	let Twitter = require('twitter');
-	let TwitterConfig = require(process.cwd()+'/config.json').twitter || {
+	let TwitterConfig = {
 			consumer_key: process.env.consumer_key,
 			consumer_secret: process.env.consumer_secret,
 			access_token_key: process.env.access_token_key,
 			access_token_secret: process.env.access_token_secret
 		};
+		
+	if (!process.env.consumer_key || 
+		!process.env.consumer_secret || 
+		!process.env.access_token_key || 
+		!process.env.access_token_secret ) {
+		TwitterConfig = require(process.cwd()+'/config.json').twitter
+	}
 
-	let twitterClient = new Twitter({
-			consumer_key: TwitterConfig.consumer_key,
-			consumer_secret: TwitterConfig.consumer_secret,
-			access_token_key: TwitterConfig.access_token_key,
-			access_token_secret: TwitterConfig.access_token_secret
-		});
+	let twitterClient = new Twitter(TwitterConfig);
 
 	let getAvailableWoeid = function(lat, long, callback){
 		let params = {

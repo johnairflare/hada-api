@@ -1,12 +1,18 @@
 let TwitterController = function(req, res){
 
 	let Twitter = require('twitter');
-	let Config = require(process.cwd()+'/config.json');
+	let TwitterConfig = require(process.cwd()+'/config.json').twitter || {
+			consumer_key: process.env.consumer_key,
+			consumer_secret: process.env.consumer_secret,
+			access_token_key: process.env.access_token_key,
+			access_token_secret: process.env.access_token_secret
+		};
+
 	let twitterClient = new Twitter({
-			consumer_key: Config.twitter.consumer_key,
-			consumer_secret: Config.twitter.consumer_secret,
-			access_token_key: Config.twitter.access_token_key,
-			access_token_secret: Config.twitter.access_token_secret
+			consumer_key: TwitterConfig.consumer_key,
+			consumer_secret: TwitterConfig.consumer_secret,
+			access_token_key: TwitterConfig.access_token_key,
+			access_token_secret: TwitterConfig.access_token_secret
 		});
 
 	let getAvailableWoeid = function(lat, long, callback){
@@ -64,7 +70,7 @@ let TwitterController = function(req, res){
 			ret.push({word:word, point:point});	
 		}
 		
-		return ret.concat(noRanking);
+		return ret.sort(function(a, b){return b.point-a.point});
 	}
 
 	let initData = function(){

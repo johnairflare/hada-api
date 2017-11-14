@@ -7,7 +7,7 @@ let TwitterController = function(req, res){
 			access_token_key: process.env.access_token_key,
 			access_token_secret: process.env.access_token_secret
 		};
-		
+
 	if (!process.env.consumer_key || 
 		!process.env.consumer_secret || 
 		!process.env.access_token_key || 
@@ -61,18 +61,21 @@ let TwitterController = function(req, res){
 		});
 	}
 
-	let handleKeywords = function(keywords){
+	let handleKeywords = function(keywords, location){
 		let ret = [];
-		let retSequence = [];
-		let pivot = 0;
-		let noRanking = [];
+		let totalPoint = 0;
 		for (var i = 0; i < keywords.length; i++) {
 			var word = keywords[i].name.replace('#','');
-			var point = keywords[i].tweet_volume | 0;
+			var point = keywords[i].tweet_volume || 0;
+			totalPoint += keywords[i].tweet_volume;
 			ret.push({word:word, point:point});	
 		}
-		
-		return ret.sort(function(a, b){return b.point-a.point});
+
+		return {
+			topics:ret.sort(function(a, b){return b.point-a.point}),
+			location:location,
+			totalPoint:totalPoint
+		};
 	}
 
 	let initData = function(){
@@ -82,16 +85,10 @@ let TwitterController = function(req, res){
 				res.send(err);	
 			}else{
 				getKeywords(location, function(err, result){
-					let topics = handleKeywords(result[0].trends);
-
-					let ret = {
-						topics:topics,
-						location:result[0].locations[0].name
-					};
-
 					if (err) {
 						res.send(err);	
 					}else{
+						let ret = handleKeywords(result[0].trends, result[0].locations[0].name);
 						res.send(ret);
 					}
 				});

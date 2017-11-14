@@ -60,28 +60,8 @@ let TwitterController = function(req, res){
 		let noRanking = [];
 		for (var i = 0; i < keywords.length; i++) {
 			var word = keywords[i].name.replace('#','');
-			if (keywords[i].tweet_volume === null) {
-				noRanking.push({word:word, point:0});	
-			}else{
-				var isAdded = false;
-
-				for (let j = pivot; j < retSequence.length; j++) {
-					
-					if (keywords[i].tweet_volume <= retSequence[j].tweet_volume) {
-						console.log('add');
-						// pivot = j;
-						isAdded = true;
-						ret.splice(ret.length - j, 0, {word:word, point:keywords[i].tweet_volume});
-						retSequence.splice(j, 0, keywords[i]);
-						break;
-					}
-				}
-
-				if (isAdded === false) {
-					retSequence.push(keywords[i]);
-					ret.splice(retSequence.length - 1, 0, {word:word, point:keywords[i].tweet_volume});
-				}
-			}
+			var point = keywords[i].tweet_volume | 0;
+			ret.push({word:word, point:point});	
 		}
 		
 		return ret.concat(noRanking);
@@ -94,10 +74,10 @@ let TwitterController = function(req, res){
 				res.send(err);	
 			}else{
 				getKeywords(location, function(err, result){
-					let keywords = handleKeywords(result[0].trends);
+					let topics = handleKeywords(result[0].trends);
 
 					let ret = {
-						keywords:keywords,
+						topics:topics,
 						location:result[0].locations[0].name
 					};
 
